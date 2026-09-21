@@ -643,7 +643,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ? supportStart + (supportEls.length - 1) * supportStagger + supportAnimTime
     : supportStart;
 
-  const curtainDelay = supportEnd + 75;
+  const curtainDelay = supportEnd + 65;
 
   // Drops the headline text back under the nav/cursor (z-index 1000 -> 1).
   // Must only happen once the curtain is FULLY transparent, otherwise the
@@ -694,15 +694,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const CELL_VW = 2.4;
     const STEP = 12;
     const BASE_ALPHA = 0.17;
-    const GLOW = 0.48;
-    const LENS_R = 60;
-    const LENS_AMP = 18;
-    const RIPPLE_SPEED = 250;
+    const GLOW = 0.5;
+    const LENS_R = 75;
+    const LENS_AMP = 10;
+    const RIPPLE_SPEED = 40;
     const RIPPLE_LIFE = 1.8;
     const RIPPLE_WIDTH = 6;
     const RIPPLE_AMP = 10;
     const SPAWN_DIST = 40;
-    const MAX_RIPPLES = 0;
+    const MAX_RIPPLES = 6;
     // ---------------------
 
     let W = 0, H = 0, cell = 0, dpr = 1;
