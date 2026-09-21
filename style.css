@@ -31,7 +31,7 @@ html.no-scroll {
   z-index: 999;
   opacity: 1;
   pointer-events: auto;
-  transition: opacity 0.5s ease-in-out;
+  transition: opacity 1.1s ease-in-out;
 }
 #black-entrance-curtain.hidden{
   opacity: 0;
@@ -216,7 +216,7 @@ span {
   filter: blur(2px);
   transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1),
               opacity 0.5s cubic-bezier(0.65, 0, 0.35, 1),
-              filter 1s cubic-bezier(0.65, 0, 0.35, 1);
+              filter 0.9s cubic-bezier(0.65, 0, 0.35, 1);
   will-change: transform, opacity, filter;
   color: #f7f7fc;
 }

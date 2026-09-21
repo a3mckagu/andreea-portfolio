@@ -578,8 +578,6 @@ h1 {
         ©2026 Andreea. No templates—just old fashioned code and creativity.
       </p>
     </div>
-
-    <!--Script: Cursor Physics, Lenis Scroll, and Image Trail Animation-->
     <script src="script.js"></script>
    <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -591,9 +589,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const supportEls = document.querySelectorAll(".entrance-content-support");
 
   const allFadeEls = document.querySelectorAll(".fade-up-in");
-  const navDelay = 100;
-  // Tagline + co-op text now starts at the same time as the nav.
-  // Raise it to start them later than the nav, lower it to start sooner.
+  const navDelay = 0;
   const delayedFadeDelay = navDelay;
 
   const preventScrollKeys = (e) => {
@@ -608,7 +604,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("touchmove", preventDefault, { passive: false });
   document.addEventListener("keydown", preventScrollKeys, { passive: false });
 
-  const startDelay = 200;
+  const startDelay = 0;
   const overshootByIndex = ["-1%", "-2%", "-3%"];
   const riseStagger = 25;
   const riseToSettleGap = 0;
@@ -626,7 +622,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const heyEnd =
     startDelay + lastLetterIndex * riseStagger + riseToSettleGap + lastLetterIndex * settleStagger + 750;
 
-  const mainStart = heyEnd + 220;
+  const mainStart = heyEnd + 200;
   const mainStagger = 150;
   const mainAnimTime = 600;
 
@@ -638,7 +634,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ? mainStart + (popEls.length - 1) * mainStagger + mainAnimTime
     : mainStart;
 
-  const supportStart = mainEnd + 300;
+  const supportStart = mainEnd + 100;
   const supportStagger = 230;
   const supportAnimTime = 600;
 
@@ -650,7 +646,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ? supportStart + (supportEls.length - 1) * supportStagger + supportAnimTime
     : supportStart;
 
-  const curtainDelay = supportEnd + 400;
+  const curtainDelay = supportEnd + 75;
 
   // Drops the headline text back under the nav/cursor (z-index 1000 -> 1).
   // Must only happen once the curtain is FULLY transparent, otherwise the
