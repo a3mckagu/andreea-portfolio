@@ -34,12 +34,7 @@
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background-color: #0e0e0f;
-  background-size: 2.4vw 2.4vw;
-  background-image:
-    linear-gradient(to right, rgba(199, 214, 246, 0.2) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(199, 214, 246, 0.2) 1px, transparent 1px);
-}
+  background-color: #0e0e0f;}
 a {
   transition: all ease-in 300ms;
 }
@@ -161,6 +156,8 @@ h1 {
     <script src="https://unpkg.com/lenis@1.3.17/dist/lenis.min.js"></script>
   </head>
   <body class="home">
+
+    <canvas id="grid-canvas"></canvas>
     <div id="black-entrance-curtain"></div>
     <div class="cursor"></div>
     <div class="nav-container" id="nav">
@@ -622,7 +619,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const heyEnd =
     startDelay + lastLetterIndex * riseStagger + riseToSettleGap + lastLetterIndex * settleStagger + 750;
 
-  const mainStart = heyEnd + 200;
+  const mainStart = heyEnd;
   const mainStagger = 150;
   const mainAnimTime = 600;
 
@@ -634,7 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ? mainStart + (popEls.length - 1) * mainStagger + mainAnimTime
     : mainStart;
 
-  const supportStart = mainEnd + 100;
+  const supportStart = mainEnd + 0;
   const supportStagger = 230;
   const supportAnimTime = 600;
 
@@ -685,6 +682,163 @@ document.addEventListener("DOMContentLoaded", () => {
 
   }, curtainDelay);
 });
+</script>
+<script>
+  (() => {
+    const canvas = document.getElementById("grid-canvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // ---- Tweak these ----
+    const CELL_VW = 2.4;
+    const STEP = 12;
+    const BASE_ALPHA = 0.17;
+    const GLOW = 0.48;
+    const LENS_R = 60;
+    const LENS_AMP = 18;
+    const RIPPLE_SPEED = 250;
+    const RIPPLE_LIFE = 1.8;
+    const RIPPLE_WIDTH = 6;
+    const RIPPLE_AMP = 10;
+    const SPAWN_DIST = 40;
+    const MAX_RIPPLES = 0;
+    // ---------------------
+
+    let W = 0, H = 0, cell = 0, dpr = 1;
+    let dirty = true, lastScroll = -1;
+    let now = 0, scrollY = 0;
+    let ox = 0, oy = 0;
+    const mouse = { x: 0, y: 0, sx: 0, sy: 0, inside: false };
+    const ripples = [];
+    let lastSpawn = null;
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      cell = W * (CELL_VW / 100);
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      dirty = true;
+    }
+
+    function displace(x, y) {
+      let dx = 0, dy = 0;
+
+      if (mouse.inside) {
+        const ax = x - mouse.sx, ay = y - mouse.sy;
+        const d2 = ax * ax + ay * ay;
+        if (d2 < LENS_R * LENS_R * 6) {
+          const d = Math.sqrt(d2) || 0.001;
+          const k = LENS_AMP * Math.exp(-d2 / (LENS_R * LENS_R)) * (d / LENS_R);
+          dx += (ax / d) * k;
+          dy += (ay / d) * k;
+        }
+      }
+
+      for (let i = 0; i < ripples.length; i++) {
+        const r = ripples[i];
+        const age = (now - r.t) / 1000;
+        const env = 1 - age / RIPPLE_LIFE;
+        const ax = x - r.x, ay = y - (r.y - scrollY);
+        const d = Math.sqrt(ax * ax + ay * ay) || 0.001;
+        const delta = d - age * RIPPLE_SPEED;
+        const g = Math.exp(-(delta * delta) / (2 * RIPPLE_WIDTH * RIPPLE_WIDTH));
+        if (g < 0.01) continue;
+        const k = RIPPLE_AMP * r.a * env * env * g * Math.cos(delta / 22) / (1 + d / 500);
+        dx += (ax / d) * k;
+        dy += (ay / d) * k;
+      }
+
+      ox = dx;
+      oy = dy;
+    }
+
+    function seg(x1, y1, x2, y2, intensity) {
+      ctx.strokeStyle = "rgba(199,214,246," + (BASE_ALPHA + intensity * GLOW).toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i * cell <= W + cell; i++) {
+        const x = i * cell;
+        let px = 0, py = 0, pi = 0, has = false;
+        for (let y = -STEP; y <= H + STEP; y += STEP) {
+          displace(x, y);
+          const X = x + ox, Y = y + oy;
+          const I = Math.min(1, Math.hypot(ox, oy) / 14);
+          if (has) seg(px, py, X, Y, (pi + I) / 2);
+          px = X; py = Y; pi = I; has = true;
+        }
+      }
+
+      const first = Math.floor(scrollY / cell);
+      const last = Math.ceil((scrollY + H) / cell);
+      for (let j = first; j <= last; j++) {
+        const y = j * cell - scrollY;
+        let px = 0, py = 0, pi = 0, has = false;
+        for (let x = -STEP; x <= W + STEP; x += STEP) {
+          displace(x, y);
+          const X = x + ox, Y = y + oy;
+          const I = Math.min(1, Math.hypot(ox, oy) / 14);
+          if (has) seg(px, py, X, Y, (pi + I) / 2);
+          px = X; py = Y; pi = I; has = true;
+        }
+      }
+    }
+
+    function frame(t) {
+      now = t;
+      scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+
+      if (mouse.inside) {
+        mouse.sx += (mouse.x - mouse.sx) * 0.18;
+        mouse.sy += (mouse.y - mouse.sy) * 0.18;
+        dirty = true;
+      }
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        if (now - ripples[i].t > RIPPLE_LIFE * 1000) ripples.splice(i, 1);
+      }
+      if (ripples.length) dirty = true;
+      if (scrollY !== lastScroll) { dirty = true; lastScroll = scrollY; }
+
+      if (dirty) { draw(); dirty = false; }
+      requestAnimationFrame(frame);
+    }
+
+    if (!reduceMotion) {
+      window.addEventListener("pointermove", (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+        if (!mouse.inside) {
+          mouse.inside = true;
+          mouse.sx = e.clientX;
+          mouse.sy = e.clientY;
+        }
+        const pageY = e.clientY + (window.pageYOffset || 0);
+        if (!lastSpawn || Math.hypot(e.clientX - lastSpawn.x, pageY - lastSpawn.y) > SPAWN_DIST) {
+          const speed = Math.min(1, Math.hypot(e.movementX || 0, e.movementY || 0) / 40);
+          ripples.push({ x: e.clientX, y: pageY, t: performance.now(), a: 0.35 + 0.65 * speed });
+          if (ripples.length > MAX_RIPPLES) ripples.shift();
+          lastSpawn = { x: e.clientX, y: pageY };
+        }
+      }, { passive: true });
+
+      document.addEventListener("mouseleave", () => { mouse.inside = false; dirty = true; });
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+    requestAnimationFrame(frame);
+  })();
 </script>
 
     <noscript>
