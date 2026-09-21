@@ -9,8 +9,33 @@ body {
   background-color: #0e0e0f;
   background-size: 2.4vw 2.4vw;
   background-image:
-    linear-gradient(to right, rgba(199, 214, 246, 0.2) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(199, 214, 246, 0.2) 1px, transparent 1px);
+    linear-gradient(to right, rgba(199, 214, 246, 0.17) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(199, 214, 246, 0.17) 1px, transparent 1px);
+}
+body.no-scroll {
+    overflow: hidden !important;
+    height: 100%;
+    touch-action: none;
+  }
+html.no-scroll {
+    overflow: hidden !important;
+    height: 100%;
+  }
+#black-entrance-curtain{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #0e0e0f;
+  z-index: 999;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.5s ease-in-out;
+}
+#black-entrance-curtain.hidden{
+  opacity: 0;
+  pointer-events: none;
 }
 a {
   transition: all ease-in 300ms;
@@ -81,7 +106,7 @@ a {
   left: calc(var(--cursor-size) / 2 * -1);
   border-radius: 100%;
 
-  z-index: 999;
+  z-index: 998;
   pointer-events: none;
 
   background-color: #6456fb;
@@ -168,6 +193,98 @@ a {
 span {
   color: #6456fb;
 }
+
+.hey-heading {
+  position: relative;
+  z-index: 1000;
+  display: inline-flex;
+  margin-top: 0.17vw;
+}
+
+.hey-heading.settled {
+  z-index: 1;
+}
+.letter-mask {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1;
+}
+.letter-inner {
+  display: inline-block;
+  transform: translateY(120%);
+  opacity: 0;
+  filter: blur(2px);
+  transition: transform 1s cubic-bezier(0.65, 0, 0.35, 1),
+              opacity 0.5s cubic-bezier(0.65, 0, 0.35, 1),
+              filter 1s cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform, opacity, filter;
+  color: #f7f7fc;
+}
+.letter-inner.rise {
+  transform: translateY(var(--overshoot, -6%));
+  opacity: 1;
+  filter: blur(0px);
+}
+
+.letter-inner.reveal {
+  transform: translateY(0);
+}
+.entrance-content {
+  position: relative;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s cubic-bezier(0.215, 0.610, 0.355, 1.000),
+              transform 0.5s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+}
+.entrance-content.reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+.entrance-content.settled {
+  z-index: 1;
+}
+.entrance-content-support {
+  position: relative;
+  z-index: 1000;
+  opacity: 0;
+  color: #6456fb;
+  transition: opacity 0.6s ease,
+              color 1s ease;
+}
+.entrance-content-support.reveal {
+  opacity: 1;
+  color: #f7f7fc;
+}
+.entrance-content-support.settled {
+  z-index: 1;
+}
+.fade-up-in {
+  opacity: 0;
+  transform: translateY(1.1vw);
+  scale: 0.95;
+  transition: opacity 0.3s ease-out,
+              transform 1s ease-out,
+              scale 0.5s ease-out;
+}
+.fade-up-in.revealed {
+  opacity: 1;
+  transform: translateY(0);
+  scale: 1;
+}
+
+.fade-up-in.fade-up-in-delayed {
+  transition: opacity 0.6s ease-out,
+              transform 1s ease-out,
+              scale 0.5s ease-out;
+}
+/* ADD THIS: */
+.fade-up-in.fade-up-in-delayed.revealed {
+  opacity: 1;
+  transform: translateY(0);
+  scale: 0.95;
+}
+
 .featured-container p {
   max-width: 33vw;
   text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.7);
@@ -206,6 +323,7 @@ h5 {
 /* Buttons */
 .button {
   background-color: transparent;
+  overflow: visible;
   border: none;
   color: #b9ccf5;
   font-weight: 700;
@@ -392,8 +510,7 @@ h5 {
     rgba(0, 0, 0, 0)
   );
   position: fixed;
-
-  z-index: 9999;
+  z-index: 997;
 }
 .nav {
   display: flex;
@@ -550,12 +667,14 @@ h5 {
   height: 2.2vw;
   width: 2.2vw;
   margin-top: 1.35vw;
-
-  transition: all ease-in-out 400ms;
 }
 .linkedin-icon:hover {
   background-image: url("images/linkedin-hover-logo.svg");
-  transition: all ease-in-out 400ms;
+  background-repeat: none;
+  background-size: cover;
+  height: 2.2vw;
+  width: 2.2vw;
+  margin-top: 1.35vw;
 }
 .instagram-icon {
   background-image: url("images/instagram-logo.svg");
@@ -564,12 +683,9 @@ h5 {
   height: 2.2vw;
   width: 2.2vw;
   margin-top: 1.35vw;
-
-  transition: all ease-in-out 400ms;
 }
 .instagram-icon:hover {
   background-image: url("images/instagram-hover-logo.svg");
-  transition: all ease-in-out 400ms;
 }
 .hero-container .right-column img {
   height: 2.6vw;
